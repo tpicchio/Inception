@@ -1,25 +1,23 @@
-# Definisci il percorso del file docker-compose.yml
-COMPOSE_FILE = ./srcs/docker-compose.yml
+all:
+	bash srcs/requirements/wordpress/tools/setup_dir.sh
+	docker-compose -f ./srcs/docker-compose.yml --env-file srcs/.env up -d --build
 
-# Target di default: esegue "up"
-all: up
-
-# Avvia i container in background
-up:
-	@docker-compose -f $(COMPOSE_FILE) up -d
-
-# Ferma e rimuove i container
 down:
-	@docker-compose -f $(COMPOSE_FILE) down
+	docker-compose -f ./srcs/docker-compose.yml --env-file srcs/.env down
 
-# Ferma i container senza rimuoverli
-stop:
-	@docker-compose -f $(COMPOSE_FILE) stop
+re: down all
 
-# Riavvia i container fermati
-start:
-	@docker-compose -f $(COMPOSE_FILE) start
+clean: down
+	docker system prune -a
+	sudo rm -rf ~/data/wordpress/*
+	sudo rm -rf ~/data/mariadb/*
 
-# Mostra lo stato dei container attivi
-status:
-	@docker ps
+fclean:
+	docker stop $$(docker ps -qa)
+	docker system prune --all --force --volumes
+	docker network prune --force
+	docker volume prune --force
+	sudo rm -rf ~/data/wordpress/*
+	sudo rm -rf ~/data/mariadb/*
+
+.PHONY	: all down re clean fclean

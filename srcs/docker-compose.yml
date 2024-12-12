@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: requirements/nginx/Dockerfile
+    image: nginx
     container_name: nginx
     depends_on:
       - wordpress
@@ -13,6 +14,7 @@ services:
     volumes:
       - ./requirements/nginx/conf/:/etc/nginx/http.d/
       - ./requirements/nginx/tools:/etc/nginx/ssl/
+      - ./requirements/bonus/static_website:/var/www/static/
       - wp-volume:/var/www/
     networks:
       - inception
@@ -29,6 +31,7 @@ services:
         DB_ROOT: ${DB_ROOT}
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT}
+    image: mariadb
     container_name: mariadb
     ports:
       - "3306:3306"
@@ -46,11 +49,13 @@ services:
         DB_NAME: ${DB_NAME}
         DB_USER: ${DB_USER}
         DB_PASS: ${DB_PASS}
+    image: wordpress
     container_name: wordpress
     depends_on:
       - mariadb
     volumes:
       - wp-volume:/var/www/
+      - wp-plugins:/var/www/wp-content/plugins
     networks:
       - inception
     restart: always
@@ -59,6 +64,7 @@ services:
     build:
       context: .
       dockerfile: requirements/bonus/redis/Dockerfile
+    image: redis
     container_name: redis
     ports:
       - "6379:6379"
@@ -73,6 +79,7 @@ services:
       args:
         FTP_USR: ${FTP_USR}
         FTP_PWD: ${FTP_PWD}
+    image: vsftpd
     container_name: vsftpd
     ports:
       - "21:21"
@@ -87,6 +94,7 @@ services:
     build:
       context: .
       dockerfile: requirements/bonus/adminer/Dockerfile
+    image: adminer
     container_name: adminer
     depends_on:
       - mariadb
@@ -96,41 +104,50 @@ services:
       - inception
     restart: always
 
-  static_website:
-    build:
-      context: .
-      dockerfile: requirements/bonus/static_website/Dockerfile
-    container_name: static_website
-    ports:
-      - "80:80"
-    restart: always
-
   portainer:
     build:
       context: .
       dockerfile: requirements/bonus/portainer/Dockerfile
+    image: portainer
     container_name: portainer
+    networks:
+      - inception
     ports:
       - "9000:9000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - inception
+      - portainer_data:/data
     restart: always
 
 volumes:
   wp-volume:
+    name: wp-volume
     driver_opts:
       o: bind
       type: none
       device: /home/tpicchio/data/wordpress
+  
+  wp-plugins:
+    name: wp-plugins
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/tpicchio/data/wordpress/wp-content/plugins
 
   db-volume:
+    name: db-volume
     driver_opts:
       o: bind
       type: none
       device: /home/tpicchio/data/mariadb
   
+  portainer_data:
+    name: portainer_data
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/tpicchio/data/portainer
+
 networks:
   inception:
     driver: bridge

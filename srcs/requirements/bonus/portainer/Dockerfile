@@ -1,26 +1,17 @@
 FROM alpine:3.20.3
 
-# Installazione delle dipendenze necessarie
-RUN apk update && apk add --no-cache \
-    ca-certificates \
+RUN apk add --no-cache \
     curl \
+    ca-certificates \
     tar \
+    libc6-compat \
+    su-exec \
     && update-ca-certificates
 
-# Verifica il download di Portainer
-RUN curl -LO https://github.com/portainer/portainer/releases/download/2.21.4/portainer-2.21.4-linux-amd64.tar.gz \
-    && tar -xzvf portainer-2.21.4-linux-amd64.tar.gz \
-    && mv portainer /usr/local/bin/portainer \
-    && chmod +x /usr/local/bin/portainer/portainer \
-    && rm portainer-2.21.4-linux-amd64.tar.gz
+RUN curl -L https://github.com/portainer/portainer/releases/download/2.19.0/portainer-2.19.0-linux-amd64.tar.gz -o portainer.tar.gz
+    
+RUN tar -xvzf portainer.tar.gz ; rm portainer.tar.gz
 
-# Crea un volume per i dati persistenti
-VOLUME /data
-
-# Esponi la porta 9000 per Portainer
 EXPOSE 9000
 
-USER root
-
-# Avvia Portainer
-CMD ["/usr/local/bin/portainer/portainer", "--host", "0.0.0.0"]
+CMD ["portainer/portainer"]

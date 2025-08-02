@@ -1,4 +1,11 @@
 all:
+	@if [ ! -d "/home/tpicchio/data" ]; then \
+		echo "Creating data directories..."; \
+		mkdir -p /home/tpicchio/data/mariadb; \
+		mkdir -p /home/tpicchio/data/wordpress/wp-content/plugins; \
+		mkdir -p /home/tpicchio/data/portainer; \
+		echo "Data directories created successfully."; \
+	fi
 	bash srcs/requirements/wordpress/tools/setup_dir.sh
 	docker-compose -f ./srcs/docker-compose.yml --env-file srcs/.env up -d --build
 

@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# Check if WordPress is already installed
+if [ ! -f "/var/www/index.php" ]; then
+    echo "Installing WordPress..."
+    cp -rf /tmp/wordpress/* /var/www/
+    chmod -R 0777 /var/www/wp-content/
+    echo "WordPress installed successfully."
+fi
+
 if [ ! -f "/var/www/wp-config.php" ]; then
 cat << EOF > /var/www/wp-config.php
 <?php

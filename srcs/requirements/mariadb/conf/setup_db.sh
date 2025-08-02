@@ -5,7 +5,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     mysqld --user=mysql --initialize --basedir=/usr --datadir=/var/lib/mysql
 fi
 
-if [ ! -d "/var/lib/mysql/wordpress" ]; then
+if [ ! -d "/var/lib/mysql/wordpress" ]; then 
     cat << EOF > /tmp/setup_db.sql
 USE mysql;
 FLUSH PRIVILEGES;

@@ -31,16 +31,15 @@ RUN apk update && apk upgrade && apk add --no-cache \
       /etc/php${PHP_VERSION}/php-fpm.d/www.conf && \
     rm -f /var/cache/apk/*
 
-WORKDIR /var/www/
+WORKDIR /tmp/
 
 RUN wget https://wordpress.org/latest.zip && \
     unzip latest.zip && \
-    cp -rf wordpress/* . && \
-    rm -rf wordpress latest.zip
+    rm latest.zip
 
-COPY ./requirements/wordpress/conf/setup-wp.sh .
+COPY ./requirements/wordpress/conf/setup-wp.sh /usr/local/bin/setup-wp.sh
+RUN chmod +x /usr/local/bin/setup-wp.sh
 
-RUN sh setup-wp.sh && rm setup-wp.sh && \
-    chmod -R 0777 wp-content/
+WORKDIR /var/www/
 
-CMD ["/usr/sbin/php-fpm83", "-F"]
+CMD ["sh", "-c", "/usr/local/bin/setup-wp.sh && /usr/sbin/php-fpm83 -F"]
